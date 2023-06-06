@@ -23,10 +23,18 @@ RUN apt-get update && apt-get install -y \
     openssl \
     libssl-dev \
     libmysqlclient-dev \
-    libpq-dev
+    libstdc++-9-dev \
+    libcurl4-openssl-dev \
+    curl \
+    libpq-dev \
+    libopencv-dev \
+    libspdlog-dev \
+    sqlite3 \
+    libsqlite3-dev
+
 
 # Clone and build Trantor library
-RUN git clone https://github.com/an-tao/trantor.git
+RUN git clone https://github.com/an-tao/trantor.git /trantor
 WORKDIR /trantor
 RUN mkdir build
 WORKDIR /trantor/build
@@ -35,7 +43,7 @@ RUN make && make install
 
 # Clone and build Drogon framework
 WORKDIR /
-RUN git clone https://github.com/an-tao/drogon.git
+RUN git clone https://github.com/an-tao/drogon.git /drogon
 WORKDIR /drogon
 RUN git submodule update --init
 RUN mkdir build
@@ -47,15 +55,13 @@ RUN make && make install
 WORKDIR /app
 
 # Copy the current folder which contains C++ source code to the Docker image under /app
-COPY . /app
+COPY ./c++ /app/c++
 
 # Specify the build command
-RUN g++ -std=c++14 -o myapp main.cpp Controller.cpp -l drogon -l trantor -l jsoncpp -l uuid -l ssl -l crypto -l boost_system -l pthread -ldl -lz -I /usr/include/jsoncpp
+RUN g++ -std=c++17 -o myapp c++/main.cpp c++/Controller.cpp c++/ImageCache.cpp -l drogon -l trantor -l jsoncpp -l uuid -l ssl -l crypto -l boost_system -l pthread -ldl -lz -l curl -l opencv_core -l opencv_imgproc -l opencv_imgcodecs -l spdlog -lsqlite3 -I /usr/include/jsoncpp -I /usr/include/opencv4 -I /usr/local/include -I /usr/local/include/spdlog -L /usr/local/lib
 
 # Expose port 80 to the outside
 EXPOSE 80
 
 # Command to run the executable
 CMD ["./myapp"]
-
-
