@@ -42,7 +42,7 @@ void HelloWorldController::resizeAndReturnImage(
       const std::string imageLink = json["imageLink"].asString();
       const int imageWidth = json["width"].asInt();
       const int imageHeight = json["height"].asInt();
-      const std::string imageFormat = json["format"].asString();
+      const bool retainFormat = json["retainFormat"].asBool();
 
       LOG_DEBUG << "Passed Image Dimensions: " << imageWidth << "x"
                 << imageHeight;
@@ -54,7 +54,6 @@ void HelloWorldController::resizeAndReturnImage(
         // Retrieve the image contents from the cache
         imageContents = cache.getImage(imageLink);
         LOG_DEBUG << "Image retrieved from cache";
-
       } else {
         CURL *curl = curl_easy_init();
         if (curl) {
@@ -122,38 +121,135 @@ void HelloWorldController::resizeAndReturnImage(
       double originalAspectRatio = (double)originalWidth / originalHeight;
       LOG_DEBUG << "Original Image Aspect Ratio: " << originalAspectRatio;
 
-      // Resize image using OpenCV
-      cv::Mat resizedImg;
-      cv::resize(img, resizedImg, cv::Size(imageWidth, imageHeight), 0, 0,
-                 cv::INTER_LANCZOS4);
+      // Calculate the target size while maintaining aspect ratio
+      int targetWidth = imageWidth;
+      int targetHeight = imageHeight;
 
-      // Apply compression parameters and encode the resized image
-      std::vector<int> compression_params;
-      if (imageFormat == "jpeg" || imageFormat == "jpg") {
-        compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
-        compression_params.push_back(90); // Set JPEG quality (0-100)
-      } else if (imageFormat == "png") {
-        compression_params.push_back(cv::IMWRITE_PNG_COMPRESSION);
-        compression_params.push_back(9); // Set PNG compression level (0-9)
+      if (retainFormat) {
+        // Calculate the new size based on the specified dimensions while
+        // maintaining aspect ratio
+        if (originalAspectRatio > 1) {
+          targetHeight = static_cast<int>(targetWidth / originalAspectRatio);
+        } else {
+          targetWidth = static_cast<int>(targetHeight * originalAspectRatio);
+        }
+
+        // Ensure that the target dimensions are not larger than the original
+        // image dimensions
+        targetWidth = std::min(targetWidth, originalWidth);
+        targetHeight = std::min(targetHeight, originalHeight);
+
+        // Resize the image using OpenCV and preserve the aspect ratio
+        cv::Mat resizedImg;
+        cv::resize(img, resizedImg, cv::Size(targetWidth, targetHeight), 0, 0,
+                   cv::INTER_AREA);
+
+        // Create a transparent or white border based on image format
+        cv::Scalar borderColor;
+
+        if (img.channels() == 4) {
+          // If the image has an alpha channel, create a transparent border
+          borderColor = cv::Scalar(0, 0, 0, 0);
+        } else {
+          // If the image doesn't have an alpha channel, create a white border
+          borderColor = cv::Scalar(255, 255, 255);
+        }
+
+        // Calculate the border sizes to maintain the target dimensions
+        int topBorder = (imageHeight - targetHeight) / 2;
+        int bottomBorder = imageHeight - targetHeight - topBorder;
+        int leftBorder = (imageWidth - targetWidth) / 2;
+        int rightBorder = imageWidth - targetWidth - leftBorder;
+
+        // Ensure that the border sizes are non-negative
+        topBorder = std::max(topBorder, 0);
+        bottomBorder = std::max(bottomBorder, 0);
+        leftBorder = std::max(leftBorder, 0);
+        rightBorder = std::max(rightBorder, 0);
+
+        // Add borders to the resized image while preserving the aspect ratio
+        cv::copyMakeBorder(resizedImg, resizedImg, topBorder, bottomBorder,
+                           leftBorder, rightBorder, cv::BORDER_CONSTANT,
+                           borderColor);
+
+        // Encode the resized image
+        std::vector<uchar> buffer;
+        cv::imencode(".png", resizedImg, buffer);
+
+        // Create a string from the buffer to send in response
+        std::string resizedImageStr(buffer.begin(), buffer.end());
+
+        // Create response
+        auto response = HttpResponse::newHttpResponse();
+        response->setBody(resizedImageStr);
+        callback(response);
+
+        // Log the resized dimensions
+        int resizedWidth = resizedImg.cols;
+        int resizedHeight = resizedImg.rows;
+        LOG_DEBUG << "Resized Image Dimensions: " << resizedWidth << "x"
+                  << resizedHeight;
+      } else {
+        // Convert the image to PNG format
+        cv::Mat pngImg;
+        cv::cvtColor(img, pngImg, cv::COLOR_BGR2BGRA);
+
+        // Calculate the new size based on the specified dimensions while
+        // maintaining aspect ratio
+        if (originalAspectRatio > 1) {
+          targetHeight = static_cast<int>(targetWidth / originalAspectRatio);
+        } else {
+          targetWidth = static_cast<int>(targetHeight * originalAspectRatio);
+        }
+
+        // Ensure that the target dimensions are not larger than the original
+        // image dimensions
+        targetWidth = std::min(targetWidth, originalWidth);
+        targetHeight = std::min(targetHeight, originalHeight);
+
+        // Resize the image using OpenCV and preserve the aspect ratio
+        cv::Mat resizedImg;
+        cv::resize(pngImg, resizedImg, cv::Size(targetWidth, targetHeight), 0,
+                   0, cv::INTER_LANCZOS4);
+
+        // Create a transparent border based on the target dimensions
+        cv::Scalar borderColor(0, 0, 0, 0);
+
+        // Calculate the border sizes to maintain the target dimensions
+        int topBorder = (imageHeight - targetHeight) / 2;
+        int bottomBorder = imageHeight - targetHeight - topBorder;
+        int leftBorder = (imageWidth - targetWidth) / 2;
+        int rightBorder = imageWidth - targetWidth - leftBorder;
+
+        // Ensure that the border sizes are non-negative
+        topBorder = std::max(topBorder, 0);
+        bottomBorder = std::max(bottomBorder, 0);
+        leftBorder = std::max(leftBorder, 0);
+        rightBorder = std::max(rightBorder, 0);
+
+        // Add borders to the resized image while preserving the aspect ratio
+        cv::copyMakeBorder(resizedImg, resizedImg, topBorder, bottomBorder,
+                           leftBorder, rightBorder, cv::BORDER_CONSTANT,
+                           borderColor);
+
+        // Encode the resized image as PNG
+        std::vector<uchar> buffer;
+        cv::imencode(".png", resizedImg, buffer);
+
+        // Create a string from the buffer to send in response
+        std::string resizedImageStr(buffer.begin(), buffer.end());
+
+        // Create response
+        auto response = HttpResponse::newHttpResponse();
+        response->setBody(resizedImageStr);
+        callback(response);
+
+        // Log the resized dimensions
+        int resizedWidth = resizedImg.cols;
+        int resizedHeight = resizedImg.rows;
+        LOG_DEBUG << "Resized Image Dimensions: " << resizedWidth << "x"
+                  << resizedHeight;
       }
-
-      std::vector<uchar> buffer;
-      std::string encoding = "." + imageFormat;
-      cv::imencode(encoding, resizedImg, buffer, compression_params);
-
-      // Create a string from the buffer to send in response
-      std::string resizedImageStr(buffer.begin(), buffer.end());
-
-      // Create response
-      auto response = HttpResponse::newHttpResponse();
-      response->setBody(resizedImageStr);
-      callback(response);
-
-      // Log the resized dimensions
-      int resizedWidth = resizedImg.cols;
-      int resizedHeight = resizedImg.rows;
-      LOG_DEBUG << "Resized Image Dimensions: " << resizedWidth << "x"
-                << resizedHeight;
     } else {
       LOG_ERROR << "Invalid JSON Format";
       auto errorResponse = HttpResponse::newHttpResponse();

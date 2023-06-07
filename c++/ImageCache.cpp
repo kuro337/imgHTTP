@@ -6,7 +6,7 @@ ImageCache::ImageCache(const std::string &dbPath) {
   int rc = sqlite3_open(dbPath.c_str(), &db);
   if (rc != SQLITE_OK) {
     std::cerr << "Cannot open database: " << sqlite3_errmsg(db);
-    // Exception 
+    // Consider throwing an exception here
   }
 }
 
@@ -20,7 +20,7 @@ void ImageCache::createTable() {
   if (rc != SQLITE_OK) {
     std::cerr << "Failed to create table: " << err_msg;
     sqlite3_free(err_msg);
-    // Exception 
+    // Consider throwing an exception here
   }
 }
 

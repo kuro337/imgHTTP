@@ -56,9 +56,14 @@ WORKDIR /app
 
 # Copy the current folder which contains C++ source code to the Docker image under /app
 COPY ./c++ /app/c++
+COPY ./tests /app/tests
+
 
 # Specify the build command
 RUN g++ -std=c++17 -o myapp c++/main.cpp c++/Controller.cpp c++/ImageCache.cpp -l drogon -l trantor -l jsoncpp -l uuid -l ssl -l crypto -l boost_system -l pthread -ldl -lz -l curl -l opencv_core -l opencv_imgproc -l opencv_imgcodecs -l spdlog -lsqlite3 -I /usr/include/jsoncpp -I /usr/include/opencv4 -I /usr/local/include -I /usr/local/include/spdlog -L /usr/local/lib
+
+# Build the tests
+# RUN g++ -std=c++17 -o mytests tests/tests.cpp c++/Controller.cpp c++/ImageCache.cpp -l drogon -l gtest -l pthread -I /usr/local/include -I /usr/include/jsoncpp  -I /usr/include/opencv4
 
 # Expose port 80 to the outside
 EXPOSE 80

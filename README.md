@@ -1,7 +1,24 @@
 # C++ OpenCV Drogon Server 
 
 
-- High Performance C++ Web Server
+ _High Performance Multi Threaded C++ Image Processing Web Server_
+
+</br>
+
+## Features 
+
+</br>
+
+
+-  Resize Images by simply providing a `Link`, `Width`, and `Height`
+-  Inbuilt `Caching` and `Multithreading` for `High Performance`
+-  Automatically Detect Image Format and Perform Conversions 
+-  Adds Transparent Padding to Maintain Original Aspect Ratio
+-  Download Images
+-  Convert Images between `JPEG` , `WEBP` , `PNG`
+
+</br>
+
 
 - `OpenCV` Image Resizing Algorithms :
   - `INTER_NEAREST` - a nearest-neighbor interpolation
@@ -13,7 +30,7 @@
 </br>
 
 - Fastest Algorithm - `INTER_NEAREST`
-- Highest Quality Algorithm - `INTER_LANCZOS4`
+- Highest Quality Algorithm - `INTER_AREA` || `INTER_LANCZOS4`
 
 ## Usage and Performance  
 
@@ -42,13 +59,20 @@ curl -X POST -H "Content-Type: application/json" -d '{ "imageLink": "https://exa
 curl -X POST -H "Content-Type: application/json" -d '{ "imageLink": "https://example.com/image.jpg", "size": "500x400" }' http://localhost:80/download
 
 # Resize Image 
-curl -X POST -H "Content-Type: application/json" -d '{ "imageLink": "https://example.com/image.png", "width": 500, "height": 400, "format": "png" }' http://localhost:80/resize --output resizedImage.png
+curl -X POST -H "Content-Type: application/json" -d '{ "imageLink": "https://ex.com/image.jpg", "width": 75, "height": 150, "retainFormat": true }' http://localhost:80/resize --output resizedImage5.jpeg
 
 # Sample Commands
 
-# Resize an Image 
 
-curl -X POST -H "Content-Type: application/json" -d '{ "imageLink": "https://images.pexels.com/photos/5230612/pexels-photo-5230612.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", "width": 100, "height": 150, "format": "jpg" }' http://localhost:80/resize --output resizedImage2.jpg
+# Resize an Image (JPEG)
+curl -X POST -H "Content-Type: application/json" -d '{ "imageLink": "https://images.pexels.com/photos/5230612/pexels-photo-5230612.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", "width": 75, "height": 150, "retainFormat": true }' http://localhost:80/resize --output resizedImage5.jpeg
+
+# Resize an Image (WebP)
+curl -X POST -H "Content-Type: application/json" -d '{ "imageLink": "https://cdn.mos.cms.futurecdn.net/GDy6nDyEtUkJbEvEpqDgoB-1600-80.jpg.webp", "width": 100, "height": 150, "retainFormat": false }' http://localhost:80/resize --output resizedImage3.png
+
+# Resize Cat Image (WebP)
+curl -X POST -H "Content-Type: application/json" -d '{ "imageLink": "https://static01.nyt.com/images/2021/09/14/science/07CAT-STRIPES/07CAT-STRIPES-superJumbo.jpg?quality=75&auto=webp", "width": 100, "height": 150, "retainFormat": false }' http://localhost:80/resize --output resizedImage3.png
+
 
 # Download an Image 
 curl -X POST -H "Content-Type: application/json" -d '{ "imageLink": "https://images.pexels.com/photos/5230612/pexels-photo-5230612.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", "size": "500x400" }' http://localhost/download
