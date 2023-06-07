@@ -9,11 +9,11 @@
 #include <opencv4/opencv2/opencv.hpp>
 #include <trantor/utils/Logger.h>
 
-HelloWorldController::HelloWorldController() : cache("image_database.db") {
+ImageProcessor::ImageProcessor() : cache("image_database.db") {
   cache.createTable();
 }
 
-void HelloWorldController::sayHello(
+void ImageProcessor::sayHello(
     const HttpRequestPtr &req,
     std::function<void(const HttpResponsePtr &)> &&callback) {
   auto response = HttpResponse::newHttpResponse();
@@ -28,7 +28,7 @@ size_t WriteCallback(void *contents, size_t size, size_t nmemb,
   return totalSize;
 }
 
-void HelloWorldController::resizeAndReturnImage(
+void ImageProcessor::resizeAndReturnImage(
     const HttpRequestPtr &req,
     std::function<void(const HttpResponsePtr &)> &&callback) {
   if (req->method() == HttpMethod::Post) {
@@ -266,7 +266,7 @@ void HelloWorldController::resizeAndReturnImage(
   }
 }
 
-void HelloWorldController::processImage(
+void ImageProcessor::processImage(
     const HttpRequestPtr &req,
     std::function<void(const HttpResponsePtr &)> &&callback) {
   if (req->method() == HttpMethod::Post) {
@@ -300,7 +300,7 @@ void HelloWorldController::processImage(
   }
 }
 
-void HelloWorldController::downloadImage(
+void ImageProcessor::downloadImage(
     const HttpRequestPtr &req,
     std::function<void(const HttpResponsePtr &)> &&callback) {
   if (req->method() == HttpMethod::Post) {

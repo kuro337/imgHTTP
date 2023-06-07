@@ -7,16 +7,16 @@
 
 using namespace drogon;
 
-class HelloWorldController
-    : public drogon::HttpController<HelloWorldController> {
+class ImageProcessor
+    : public drogon::HttpController<ImageProcessor> {
 public:
-  HelloWorldController();
+  ImageProcessor();
 
   METHOD_LIST_BEGIN
-  ADD_METHOD_TO(HelloWorldController::sayHello, "/", Get);
-  ADD_METHOD_TO(HelloWorldController::processImage, "/", Post);
-  ADD_METHOD_TO(HelloWorldController::downloadImage, "/download", Post);
-  ADD_METHOD_TO(HelloWorldController::resizeAndReturnImage, "/resize", Post);
+  ADD_METHOD_TO(ImageProcessor::sayHello, "/", Get);
+  ADD_METHOD_TO(ImageProcessor::processImage, "/", Post);
+  ADD_METHOD_TO(ImageProcessor::downloadImage, "/download", Post);
+  ADD_METHOD_TO(ImageProcessor::resizeAndReturnImage, "/resize", Post);
   METHOD_LIST_END
 
   void sayHello(const HttpRequestPtr &req,
