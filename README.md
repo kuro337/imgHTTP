@@ -1,24 +1,21 @@
-# C++ OpenCV Drogon Server 
+# C++ OpenCV Drogon Server
 
-
- _High Performance Multi Threaded C++ Image Processing Web Server_
-
-</br>
-
-## Features 
+_High Performance Multi Threaded C++ Image Processing Web Server_
 
 </br>
 
-
--  Resize Images by simply providing a `Link`, `Width`, and `Height`
--  Inbuilt `Caching` and `Multithreading` for `High Performance`
--  Automatically Detect Image Format and Perform Conversions 
--  Adds Transparent Padding to Maintain Original Aspect Ratio
--  Download Images
--  Convert Images between `JPEG` , `WEBP` , `PNG`
+## Features
 
 </br>
 
+- Resize Images by simply providing a `Link`, `Width`, and `Height`
+- Inbuilt `Caching` and `Multithreading` for `High Performance`
+- Automatically Detect Image Format and Perform Conversions
+- Adds Transparent Padding to Maintain Original Aspect Ratio
+- Download Images
+- Convert Images between `JPEG` , `WEBP` , `PNG`
+
+</br>
 
 - `OpenCV` Image Resizing Algorithms :
   - `INTER_NEAREST` - a nearest-neighbor interpolation
@@ -32,22 +29,26 @@
 - Fastest Algorithm - `INTER_NEAREST`
 - Highest Quality Algorithm - `INTER_AREA` || `INTER_LANCZOS4`
 
-## Usage and Performance  
+## Usage and Performance
 
 </br>
 
-
 ```bash
-# Running the Image Server
-docker run --rm --name img -p 80:80 imghttp
+mkdir build && cd build
+cmake ..
+make
 
-# Viewing the Images
-docker exec imghttp2 ls /app/images
+cd bin
+
+./simple
+./imghttp_test
+
 ```
-- Endpoints 
+
+- Endpoints
 
 ```bash
-# Commands 
+# Commands
 
 # Hello World
 curl -X GET http://localhost
@@ -55,10 +56,10 @@ curl -X GET http://localhost
 # POST Return Link
 curl -X POST -H "Content-Type: application/json" -d '{ "imageLink": "https://example.com/image.jpg", "size": "500x400" }' http://localhost
 
-# Download Image 
+# Download Image
 curl -X POST -H "Content-Type: application/json" -d '{ "imageLink": "https://example.com/image.jpg", "size": "500x400" }' http://localhost:80/download
 
-# Resize Image 
+# Resize Image
 curl -X POST -H "Content-Type: application/json" -d '{ "imageLink": "https://ex.com/image.jpg", "width": 75, "height": 150, "retainFormat": true }' http://localhost:80/resize --output resizedImage5.jpeg
 
 # Sample Commands
@@ -74,7 +75,7 @@ curl -X POST -H "Content-Type: application/json" -d '{ "imageLink": "https://cdn
 curl -X POST -H "Content-Type: application/json" -d '{ "imageLink": "https://static01.nyt.com/images/2021/09/14/science/07CAT-STRIPES/07CAT-STRIPES-superJumbo.jpg?quality=75&auto=webp", "width": 100, "height": 150, "retainFormat": false }' http://localhost:80/resize --output resizedImage3.png
 
 
-# Download an Image 
+# Download an Image
 curl -X POST -H "Content-Type: application/json" -d '{ "imageLink": "https://images.pexels.com/photos/5230612/pexels-photo-5230612.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", "size": "500x400" }' http://localhost/download
 
 
@@ -82,7 +83,7 @@ docker exec img ls /app/images
 
 ```
 
-## Performance 
+## Performance
 
 - Create `request.lua` file
 
@@ -111,30 +112,28 @@ end
 - Run `Performance Test`
 
 ```bash
-# Measuring Performance using wrk 
+# Measuring Performance using wrk
 sudo apt-get install wrk
 
 # Small Load
 wrk -c 10 -t 10 -d 10s -s request.lua http://localhost:80
 
-# Large Load 
+# Large Load
 wrk -c 100 -t 1000 -d 30s -s request.lua http://localhost:80
 
 
-# Monitoring CPU and Memory Usage 
+# Monitoring CPU and Memory Usage
 
 sudo apt-get install docker-stats
 docker stats <container_id>
 
-# Increasing number of Open Files that can be created 
-ulimit -n # Shows file limit 
+# Increasing number of Open Files that can be created
+ulimit -n # Shows file limit
 ulimit -n 10000 # Sets file limit to 10000
 
 ```
 
-
-
-- `C++` Sample Code included as a single `.cpp` file in case you want to run a Drogon server yourself 
+- `C++` Sample Code included as a single `.cpp` file in case you want to run a Drogon server yourself
 
 ```cpp
 
@@ -207,8 +206,7 @@ int main()
 
 ```
 
-
-- `Dockerfile` to build 
+- `Dockerfile` to build
 
 ```dockerfile
 # Base image
